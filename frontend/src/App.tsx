@@ -3,24 +3,58 @@ import { Competition, Match } from './types';
 import { footballApi } from './services/api';
 import MatchCard from './components/MatchCard';
 import CompetitionFilter from './components/CompetitionFilter';
+import Navigation from './components/Navigation';
+import CompetitionsTab from './components/CompetitionsTab';
+import TeamsTab from './components/TeamsTab';
+import LiveDataTab from './components/LiveDataTab';
+import MatchDetailsModal from './components/MatchDetailsModal';
 
 const App: React.FC = () => {
   const [matches, setMatches] = useState<Match[]>([]);
   const [liveMatches, setLiveMatches] = useState<Match[]>([]);
   const [competitions, setCompetitions] = useState<Competition[]>([]);
   const [selectedCompetition, setSelectedCompetition] = useState<number | null>(null);
-  const [activeTab, setActiveTab] = useState<'all' | 'live'>('all');
+  const [activeTab, setActiveTab] = useState<string>('matches');
+  const [matchSubTab, setMatchSubTab] = useState<'all' | 'live'>('all');
   const [loading, setLoading] = useState(false);
+  const [selectedMatchId, setSelectedMatchId] = useState<number | null>(null);
 
   useEffect(() => {
-    loadCompetitions();
-    loadMatches();
-    loadLiveMatches();
-  }, []);
+    if (activeTab === 'matches') {
+      loadCompetitions();
+      loadLiveMatches();
+      
+      // Set up real-time updates every 30 seconds
+      const interval = setInterval(() => {
+        loadLiveMatches();
+      }, 30000);
+      
+      return () => clearInterval(interval);
+    }
+  }, [activeTab]);
 
-  useEffect(() => {
-    loadMatches();
-  }, [selectedCompetition]);
+  const loadLiveMatches = async () => {
+    try {
+      setLoading(true);
+      const response = await footballApi.getLiveMatchesFromAPI();
+      const allMatches = response.data?.matches || response.matches || [];
+      
+      // Filter for truly live matches (IN_PLAY, PAUSED) and recent matches
+      const liveMatches = allMatches.filter((match: any) => 
+        match.status === 'IN_PLAY' || 
+        match.status === 'PAUSED' ||
+        match.status === 'LIVE' ||
+        (match.status === 'FINISHED' && 
+         new Date(match.lastUpdated || match.utcDate).getTime() > Date.now() - 2 * 60 * 60 * 1000) // Last 2 hours
+      );
+      
+      setLiveMatches(liveMatches);
+    } catch (error) {
+      console.error('Error loading live matches:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const loadCompetitions = async () => {
     try {
@@ -31,33 +65,12 @@ const App: React.FC = () => {
     }
   };
 
-  const loadMatches = async () => {
-    try {
-      setLoading(true);
-      const data = await footballApi.getMatches(selectedCompetition || undefined);
-      setMatches(data);
-    } catch (error) {
-      console.error('Error loading matches:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  const loadLiveMatches = async () => {
-    try {
-      const data = await footballApi.getLiveMatches();
-      setLiveMatches(data);
-    } catch (error) {
-      console.error('Error loading live matches:', error);
-    }
-  };
 
   const syncData = async () => {
     try {
       setLoading(true);
       await footballApi.syncData();
-      await loadMatches();
-      await loadLiveMatches();
       alert('Data synced successfully!');
     } catch (error) {
       console.error('Error syncing data:', error);
@@ -67,79 +80,88 @@ const App: React.FC = () => {
     }
   };
 
-  const currentMatches = activeTab === 'live' ? liveMatches : matches;
+
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'competitions':
+        return <CompetitionsTab />;
+      case 'teams':
+        return <TeamsTab />;
+      case 'live':
+        return <LiveDataTab />;
+      case 'matches':
+      default:
+        return renderMatchesTab();
+    }
+  };
+
+  const renderMatchesTab = () => {
+    return (
+      <div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <div>
+            <h2>Live Matches</h2>
+            <p style={{ fontSize: '12px', color: '#666', margin: '5px 0 0 0' }}>
+              Auto-refreshes every 30 seconds • Showing live and recent matches
+            </p>
+          </div>
+          <button
+            onClick={() => { syncData(); loadLiveMatches(); }}
+            disabled={loading}
+            style={{
+              padding: '10px 20px',
+              backgroundColor: '#4CAF50',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: loading ? 'not-allowed' : 'pointer'
+            }}
+          >
+            {loading ? 'Loading...' : 'Refresh Now'}
+          </button>
+        </div>
+
+        <div>
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: '20px' }}>Loading live matches...</div>
+          ) : liveMatches.length > 0 ? (
+            liveMatches.map((match, index) => (
+              <MatchCard 
+                key={match.id || index} 
+                match={match} 
+                onClick={(matchId) => setSelectedMatchId(matchId)}
+              />
+            ))
+          ) : (
+            <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
+              No live matches currently. The page auto-refreshes every 30 seconds to check for new matches.
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
-      <header style={{ textAlign: 'center', marginBottom: '30px' }}>
+    <div className="app-container">
+      <header className="header">
         <h1>Live Football App</h1>
-        <button
-          onClick={syncData}
-          disabled={loading}
-          style={{
-            padding: '10px 20px',
-            backgroundColor: '#4CAF50',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: loading ? 'not-allowed' : 'pointer'
-          }}
-        >
-          {loading ? 'Syncing...' : 'Sync Data'}
-        </button>
       </header>
 
-      <div style={{ marginBottom: '20px' }}>
-        <button
-          onClick={() => setActiveTab('all')}
-          style={{
-            padding: '8px 16px',
-            marginRight: '8px',
-            backgroundColor: activeTab === 'all' ? '#2196F3' : '#f5f5f5',
-            color: activeTab === 'all' ? 'white' : 'black',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}
-        >
-          All Matches
-        </button>
-        <button
-          onClick={() => setActiveTab('live')}
-          style={{
-            padding: '8px 16px',
-            backgroundColor: activeTab === 'live' ? '#2196F3' : '#f5f5f5',
-            color: activeTab === 'live' ? 'white' : 'black',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}
-        >
-          Live Matches ({liveMatches.length})
-        </button>
-      </div>
+      <Navigation
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+      />
 
-      {activeTab === 'all' && (
-        <CompetitionFilter
-          competitions={competitions}
-          selectedCompetition={selectedCompetition}
-          onCompetitionChange={setSelectedCompetition}
+      {renderContent()}
+      
+      {selectedMatchId && (
+        <MatchDetailsModal
+          matchId={selectedMatchId}
+          onClose={() => setSelectedMatchId(null)}
         />
       )}
-
-      <div>
-        {loading ? (
-          <div style={{ textAlign: 'center', padding: '20px' }}>Loading...</div>
-        ) : currentMatches.length > 0 ? (
-          currentMatches.map((match) => (
-            <MatchCard key={match.id} match={match} />
-          ))
-        ) : (
-          <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
-            No matches found. Click "Sync Data" to fetch latest matches.
-          </div>
-        )}
-      </div>
     </div>
   );
 };

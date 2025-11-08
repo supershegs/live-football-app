@@ -48,8 +48,8 @@ urlpatterns = [
     
     
     
-    path('matches/', MatchListView.as_view(), name='matches'),
-    path('live-matches/', LiveMatchesView.as_view(), name='live-matches'),   
+    # path('matches/', MatchListView.as_view(), name='matches'),
+    # path('live-matches/', LiveMatchesView.as_view(), name='live-matches'),   
     path('matches/live/', DisplayLiveMatchesView.as_view(), name='available-live-matches'),
     path('matches/live/<int:pk>/', DisplayLiveMatchesView.as_view(), name='available-particular-live-matches'),
     path('matches/live/<int:pk>/head2head/', DisplayLiveMatchesH2HView.as_view(), name='available-particular-live-matches-h2h'),

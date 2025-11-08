@@ -2,31 +2,26 @@ import React from 'react';
 import { Match } from '../types';
 
 interface MatchCardProps {
-  match: Match;
+  match: any;
+  onClick?: (matchId: number) => void;
 }
 
-const MatchCard: React.FC<MatchCardProps> = ({ match }) => {
+const MatchCard: React.FC<MatchCardProps> = ({ match, onClick }) => {
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString();
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'IN_PLAY': return '#4CAF50';
-      case 'FINISHED': return '#757575';
-      case 'SCHEDULED': return '#2196F3';
-      default: return '#FF9800';
-    }
-  };
+  const competition = match.competition || {};
+  const homeTeam = match.homeTeam || match.home_team || {};
+  const awayTeam = match.awayTeam || match.away_team || {};
+  const homeScore = match.score?.fullTime?.home ?? match.home_score;
+  const awayScore = match.score?.fullTime?.away ?? match.away_score;
+  const matchDate = match.utcDate || match.utc_date;
 
   return (
-    <div style={{
-      border: '1px solid #ddd',
-      borderRadius: '8px',
-      padding: '16px',
-      margin: '8px 0',
-      backgroundColor: '#fff'
-    }}>
+    <div className="match-card" 
+         style={{ cursor: onClick ? 'pointer' : 'default' }}
+         onClick={() => onClick && match.id && onClick(match.id)}>
       <div style={{ 
         display: 'flex', 
         justifyContent: 'space-between', 
@@ -34,15 +29,14 @@ const MatchCard: React.FC<MatchCardProps> = ({ match }) => {
         marginBottom: '8px'
       }}>
         <span style={{ fontSize: '12px', color: '#666' }}>
-          {match.competition.name}
+          {competition.name || 'Competition'}
         </span>
-        <span style={{
-          padding: '4px 8px',
-          borderRadius: '4px',
-          fontSize: '12px',
-          backgroundColor: getStatusColor(match.status),
-          color: 'white'
-        }}>
+        <span className={`status-badge ${
+          match.status === 'IN_PLAY' ? 'status-in-play' :
+          match.status === 'FINISHED' ? 'status-finished' :
+          match.status === 'SCHEDULED' ? 'status-scheduled' :
+          'status-default'
+        }`}>
           {match.status}
         </span>
       </div>
@@ -54,15 +48,15 @@ const MatchCard: React.FC<MatchCardProps> = ({ match }) => {
         fontSize: '16px',
         fontWeight: 'bold'
       }}>
-        <span>{match.home_team.name}</span>
+        <span>{homeTeam.shortName || homeTeam.name || 'Home Team'}</span>
         <div style={{ textAlign: 'center' }}>
-          {match.home_score !== null && match.away_score !== null ? (
-            <span>{match.home_score} - {match.away_score}</span>
+          {homeScore !== null && homeScore !== undefined && awayScore !== null && awayScore !== undefined ? (
+            <span>{homeScore} - {awayScore}</span>
           ) : (
             <span>vs</span>
           )}
         </div>
-        <span>{match.away_team.name}</span>
+        <span>{awayTeam.shortName || awayTeam.name || 'Away Team'}</span>
       </div>
       
       <div style={{ 
@@ -71,7 +65,7 @@ const MatchCard: React.FC<MatchCardProps> = ({ match }) => {
         marginTop: '8px',
         textAlign: 'center'
       }}>
-        {formatDate(match.utc_date)}
+        {formatDate(matchDate)}
       </div>
     </div>
   );
