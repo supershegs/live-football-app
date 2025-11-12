@@ -8,6 +8,7 @@ interface NavigationProps {
 
 const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
   const tabs = [
+    { id: 'livestream', label: 'Live Stream' },
     { id: 'matches', label: 'Matches' },
     { id: 'competitions', label: 'Competitions' },
     { id: 'teams', label: 'Teams' },

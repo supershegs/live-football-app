@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: live-football-backend
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn football_api.wsgi:application"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: DEBUG
+        value: False
+      - key: SECRET_KEY
+        generateValue: true
+      - key: FOOTBALL_API_KEY
+        value: 038d4fe4056c4774be16101f624ac973
+      - key: DATABASE_URL
+        fromDatabase:
+          name: live-football-db
+          property: connectionString
+
+  - type: pserv
+    name: live-football-db
+    databaseName: live_football
+    databaseUser: admin

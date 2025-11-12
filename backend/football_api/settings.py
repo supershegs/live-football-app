@@ -1,11 +1,15 @@
 import os
 from decouple import config
+import dj_database_url
+
+
+from datetime import timedelta
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SECRET_KEY = config('SECRET_KEY', default='your-secret-key-here')
 DEBUG = config('DEBUG', default=True, cast=bool)
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -23,6 +27,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -30,7 +35,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'middlewares.RequestResponseLoggingMiddleware',
 ]
 
 ROOT_URLCONF = 'football_api.urls'
@@ -54,10 +58,10 @@ TEMPLATES = [
 WSGI_APPLICATION = 'football_api.wsgi.application'
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
+    'default': dj_database_url.config(
+        default=config('DATABASE_URL', f'sqlite:///{os.path.join(BASE_DIR, "db.sqlite3")}'),
+        conn_max_age=600
+    )
 }
 
 REST_FRAMEWORK = {
@@ -78,7 +82,6 @@ SPECTACULAR_SETTINGS = {
     'COMPONENT_SPLIT_REQUEST': True,
 }
 
-from datetime import timedelta
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
@@ -89,7 +92,10 @@ SIMPLE_JWT = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "https://your-netlify-app.netlify.app",
 ]
+
+CORS_ALLOW_ALL_ORIGINS = DEBUG
 
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
@@ -98,6 +104,8 @@ USE_L10N = True
 USE_TZ = True
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+# STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 FOOTBALL_API_KEY = config('FOOTBALL_API_KEY', default='')
 FOOTBALL_API_BASE_URL = config('FOOTBALL_API_BASE_URL', default='')
@@ -106,3 +114,9 @@ ALL_AREA_PATH = config('ALL_AREA_PATH', default='')
 ALL_AVAILABLE_MATCHES_PATH = config('ALL_AVAILABLE_MATCHES_PATH', default='')
 ALL_AVAILABLE_TEAMS_PATH = config('ALL_AVAILABLE_TEAMS_PATH', default='')
 ALL_AVAILABLE_PERSONS_PATH = config('ALL_AVAILABLE_PERSONS_PATH', default='')
+
+RAPID_FOOTBALL_API_URL = config('RAPID_FOOTBALL_API_URL', default='')   
+RAPID_FOOTBALL_API_KEY = config('RAPID_FOOTBALL_API_KEY', default='')
+RAPID_FOOTBALL_API_HOST = config('RAPID_FOOTBALL_API_HOST', default='')
+ALL_MATCH_PATH = config('ALL_MATCH_PATH', default='')
+LIVE_STREAM_PATH = config('LIVE_STREAM_PATH', default='')

@@ -7,6 +7,7 @@ import Navigation from './components/Navigation';
 import CompetitionsTab from './components/CompetitionsTab';
 import TeamsTab from './components/TeamsTab';
 import LiveDataTab from './components/LiveDataTab';
+import LiveStreamTab from './components/LiveStreamTab';
 import MatchDetailsModal from './components/MatchDetailsModal';
 
 const App: React.FC = () => {
@@ -14,7 +15,7 @@ const App: React.FC = () => {
   const [liveMatches, setLiveMatches] = useState<Match[]>([]);
   const [competitions, setCompetitions] = useState<Competition[]>([]);
   const [selectedCompetition, setSelectedCompetition] = useState<number | null>(null);
-  const [activeTab, setActiveTab] = useState<string>('matches');
+  const [activeTab, setActiveTab] = useState<string>('livestream');
   const [matchSubTab, setMatchSubTab] = useState<'all' | 'live'>('all');
   const [loading, setLoading] = useState(false);
   const [selectedMatchId, setSelectedMatchId] = useState<number | null>(null);
@@ -90,9 +91,12 @@ const App: React.FC = () => {
         return <TeamsTab />;
       case 'live':
         return <LiveDataTab />;
+      case 'livestream':
+        return <LiveStreamTab />;
       case 'matches':
-      default:
         return renderMatchesTab();
+      default:
+        return <LiveStreamTab />;
     }
   };
 
@@ -146,7 +150,10 @@ const App: React.FC = () => {
   return (
     <div className="app-container">
       <header className="header">
-        <h1>Live Football App</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ fontSize: '32px' }}>⚽</div>
+          <h1 style={{ margin: 0, background: 'linear-gradient(135deg, #4CAF50, #2196F3)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontSize: '28px', fontWeight: 'bold' }}>Socca Live Football App</h1>
+        </div>
       </header>
 
       <Navigation

@@ -7,11 +7,19 @@ from rest_framework.response import Response
 
 
 class FootballDataServiceManager:
-    def __init__(self, path: str):
-        self.api_url = f"{settings.FOOTBALL_API_BASE_URL}{path}"
-        self.headers = {
-            'X-Auth-Token': settings.FOOTBALL_API_KEY
-        }
+    def __init__(self, path: str, is_live_stream: bool= False):
+        
+        if is_live_stream:
+            self.api_url = f"{settings.RAPID_FOOTBALL_API_URL}{path}"
+            self.headers = {
+                'x-rapidapi-key': settings.RAPID_FOOTBALL_API_KEY,
+                'x-rapidapi-host': settings.RAPID_FOOTBALL_API_HOST
+            }
+        else:
+            self.api_url = f"{settings.FOOTBALL_API_BASE_URL}{path}"
+            self.headers = {
+                'X-Auth-Token': settings.FOOTBALL_API_KEY
+            }
 
     def get(self, params=None):
         try: 

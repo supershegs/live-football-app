@@ -96,3 +96,64 @@ class DisplayLiveMatchesH2HView(APIView):
         
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+@extend_schema(
+    summary="Get livestream matches",
+    description="Fetch livestream matches",
+    parameters=[
+        OpenApiParameter(
+            name='pk',
+            type=OpenApiTypes.STR,
+            location=OpenApiParameter.PATH,
+            description='Match ID'
+        )
+    ]
+)
+class LiveStreamMatchesView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    def get(self, request, pk=None):
+        try:
+            if pk:
+                path = f"{settings.LIVE_STREAM_PATH}{pk}/" 
+            else:
+                path = f"{settings.ALL_MATCH_PATH}"    
+            
+            service_manager = FootballDataServiceManager(path, is_live_stream=True)
+            service_response = service_manager.get()
+            data = SendResposne.send_response(service_response)
+            return Response(data, status=data['status_code'])
+        
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+
+      
+@extend_schema(
+    summary="Get livestream match link",
+    description="Fetch livestream link for a specific match",
+    parameters=[
+        OpenApiParameter(
+            name='pk',
+            type=OpenApiTypes.INT,
+            location=OpenApiParameter.PATH,
+            description='Match ID'
+        )
+    ]
+)
+class LiveStreamMatchLinkView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    def get(self, request, pk=None):
+        try:
+            
+            path = f"{settings.LIVE_STREAM_PATH}{pk}/"    
+            service_manager = FootballDataServiceManager(path, is_live_stream=True)
+            service_response = service_manager.get()
+            data = SendResposne.send_response(service_response)
+            return Response(data, status=data['status_code'])
+        
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

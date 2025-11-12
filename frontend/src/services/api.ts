@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Competition, Match, Team, AuthTokens, LoginCredentials } from '../types';
 
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -124,6 +124,13 @@ export const footballApi = {
   
   getFootballAreaDetails: (id: number): Promise<any> =>
     api.get(`/football-areas/live/${id}/`).then(response => response.data),
+  
+  // Live Stream Matches
+  getLiveStreamMatches: (): Promise<any> =>
+    api.get('/live/stream/matches/').then(response => response.data),
+  
+  getLiveStreamLink: (id: string): Promise<any> =>
+    api.get(`/live/stream/matches/${id}/`).then(response => response.data),
   
   // Sync (Available endpoint)
   syncData: (): Promise<void> =>

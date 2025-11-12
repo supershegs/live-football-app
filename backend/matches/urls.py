@@ -14,7 +14,8 @@ from matches.views.fetchcompetitionlive import (
 from matches.views.livematches import (
     LiveMatchesView,
     DisplayLiveMatchesView,
-    DisplayLiveMatchesH2HView
+    DisplayLiveMatchesH2HView,
+    LiveStreamMatchesView
 )
 
 from matches.views.teams import (
@@ -49,7 +50,10 @@ urlpatterns = [
     
     
     # path('matches/', MatchListView.as_view(), name='matches'),
-    # path('live-matches/', LiveMatchesView.as_view(), name='live-matches'),   
+    # path('live-matches/', LiveMatchesView.as_view(), name='live-matches'),
+    path('live/stream/matches/', LiveStreamMatchesView.as_view(), name='available-live-stream-matches'),
+    path('live/stream/matches/<str:pk>/', LiveStreamMatchesView.as_view(), name='available-live-stream-matches'),
+       
     path('matches/live/', DisplayLiveMatchesView.as_view(), name='available-live-matches'),
     path('matches/live/<int:pk>/', DisplayLiveMatchesView.as_view(), name='available-particular-live-matches'),
     path('matches/live/<int:pk>/head2head/', DisplayLiveMatchesH2HView.as_view(), name='available-particular-live-matches-h2h'),

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { footballApi } from '../services/api';
+import MatchCard from './MatchCard';
 
 const LiveDataTab: React.FC = () => {
   const [liveMatches, setLiveMatches] = useState<any>(null);
@@ -150,17 +151,20 @@ const LiveDataTab: React.FC = () => {
       {liveMatches && (
         <div style={{ marginBottom: '20px' }}>
           <h3>Live Matches</h3>
-          <div style={{
-            backgroundColor: '#f9f9f9',
-            padding: '15px',
-            borderRadius: '8px',
-            maxHeight: '300px',
-            overflow: 'auto'
-          }}>
-            <pre style={{ fontSize: '12px', whiteSpace: 'pre-wrap' }}>
-              {JSON.stringify(liveMatches, null, 2)}
-            </pre>
-          </div>
+          {(() => {
+            const matches = liveMatches.data?.matches || liveMatches.matches || [];
+            return matches.length > 0 ? (
+              <div>
+                {matches.map((match: any, index: number) => (
+                  <MatchCard key={match.id || index} match={match} onClick={() => {}} />
+                ))}
+              </div>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
+                No live matches available
+              </div>
+            );
+          })()} 
         </div>
       )}
 
@@ -201,17 +205,33 @@ const LiveDataTab: React.FC = () => {
       {footballAreas && (
         <div style={{ marginBottom: '20px' }}>
           <h3>Football Areas</h3>
-          <div style={{
-            backgroundColor: '#f9f9f9',
-            padding: '15px',
-            borderRadius: '8px',
-            maxHeight: '300px',
-            overflow: 'auto'
-          }}>
-            <pre style={{ fontSize: '12px', whiteSpace: 'pre-wrap' }}>
-              {JSON.stringify(footballAreas, null, 2)}
-            </pre>
-          </div>
+          {(() => {
+            const areas = footballAreas.data?.areas || footballAreas.areas || [];
+            return areas.length > 0 ? (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '15px' }}>
+                {areas.map((area: any) => (
+                  <div key={area.id} style={{
+                    border: '1px solid #ddd',
+                    borderRadius: '8px',
+                    padding: '15px',
+                    backgroundColor: '#fff'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                      {area.flag && (
+                        <img src={area.flag} alt={area.name} style={{ width: '24px', height: '18px', marginRight: '10px' }} />
+                      )}
+                      <h4 style={{ margin: '0', fontSize: '16px' }}>{area.name}</h4>
+                    </div>
+                    <p style={{ margin: '0', fontSize: '12px', color: '#666' }}>Code: {area.code}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
+                No football areas available
+              </div>
+            );
+          })()} 
         </div>
       )}
     </div>
