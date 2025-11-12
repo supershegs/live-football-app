@@ -9,8 +9,13 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SECRET_KEY = config('SECRET_KEY', default='your-secret-key-here')
 DEBUG = config('DEBUG', default=True, cast=bool)
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
-
+ALLOWED_HOSTS = [
+    'live-football-app-backend.onrender.com',
+    'render.com',
+    'localhost',
+    '127.0.0.1',
+    '*'
+]
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
