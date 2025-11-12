@@ -1,3 +1,4 @@
+aiven-client==4.10.0
 asgiref==3.10.0
 attrs==25.4.0
 certifi==2025.10.5
@@ -21,6 +22,8 @@ pytz==2025.2
 PyYAML==6.0.3
 referencing==0.37.0
 requests==2.31.0
+requests-toolbelt==1.0.0
+setuptools>=65.5.0
 rpds-py==0.28.0
 sqlparse==0.5.3
 typing_extensions==4.15.0
