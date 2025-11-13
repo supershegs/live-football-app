@@ -97,8 +97,10 @@ SIMPLE_JWT = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "https://your-netlify-app.netlify.app",
+    "https://socca-live-footall.netlify.app",
 ]
+
+CORS_ALLOW_ALL_ORIGINS = DEBUG
 
 CORS_ALLOW_ALL_ORIGINS = DEBUG
 
