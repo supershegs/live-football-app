@@ -10,4 +10,4 @@
   status = 200
 
 [build.environment]
-  REACT_APP_API_BASE_URL = "https://live-football-app-backend.onrender.com/api "
+  REACT_APP_API_BASE_URL = "https://live-football-app-backend.onrender.com/api"
